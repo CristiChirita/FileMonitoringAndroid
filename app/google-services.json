@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "957123554581",
+    "firebase_url": "https://fir-cm-9cea9.firebaseio.com",
+    "project_id": "fir-cm-9cea9",
+    "storage_bucket": "fir-cm-9cea9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:957123554581:android:415ffecb9b7b80ca",
+        "android_client_info": {
+          "package_name": "nttdata.com.filemonitoringnotifications"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "957123554581-mta52im25tq3rkghos9pkd2amq8fhcgn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMwUizFiBLEHZHd_QzNjdNb7SqhElbVVc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
