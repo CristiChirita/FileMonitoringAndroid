@@ -13,6 +13,16 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+
+import static nttdata.com.filemonitoringnotifications.MainActivity.bean;
 
 public class AppFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
@@ -32,7 +42,18 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-
+            String modifiedFilesString = remoteMessage.getData().get("Modified files");
+            modifiedFilesString = modifiedFilesString.replace("[", "").replace("]", "");
+            List<String> modifiedFiles = new ArrayList<>(Arrays.asList(modifiedFilesString.split(",")));
+            if (modifiedFiles != null) {
+                for (String fileName : modifiedFiles) {
+                    HashSet<String> newFiles = bean.getFiles();
+                    newFiles.add(fileName);
+                    bean.setFiles(newFiles);
+                }
+                Log.d(TAG, "Scheduling pull");
+                scheduleJob();
+            }
 
         }
 
@@ -43,10 +64,10 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
-        sendNotification(remoteMessage.getNotification().getBody());
+        sendNotification(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle());
     }
 
-    private void sendNotification(String messageBody) {
+    private void sendNotification(String messageBody, String messageTitle) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -57,7 +78,7 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                        .setContentTitle("FCM Message")
+                        .setContentTitle(messageTitle)
                         .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
@@ -75,6 +96,17 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+
+    private void scheduleJob() {
+        // [START dispatch_job]
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(PullService.class)
+                .setTag("my-job-tag")
+                .build();
+        dispatcher.schedule(myJob);
+        // [END dispatch_job]
     }
 
 }

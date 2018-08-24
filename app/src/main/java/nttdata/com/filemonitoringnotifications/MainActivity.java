@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    public static volatile FileDownloadBean bean = new FileDownloadBean();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,5 +33,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
     }
 }
