@@ -1,13 +1,13 @@
 package nttdata.com.filemonitoringnotifications;
 
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 
-import org.apache.commons.net.ftp.FTPClient;
-
+import java.io.File;
 import java.util.HashSet;
 
 import static nttdata.com.filemonitoringnotifications.MainActivity.bean;
@@ -15,15 +15,13 @@ import static nttdata.com.filemonitoringnotifications.MainActivity.bean;
 public class PullService extends JobService{
 
     private static final String TAG = "PullService";
-    private static FTPClient client = new FTPClient();
     private RetrieveFilesTask task = new RetrieveFilesTask();
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.d(TAG, "Performing long running task in scheduled job");
         // TODO(developer): add long running task here.
-        task.execute();
-        task.onPostExecute();
+        task.execute("Directory");
         return false;
     }
 
@@ -37,34 +35,10 @@ public class PullService extends JobService{
 
         @Override
         protected Void doInBackground(String... urls) {
-            boolean login = false;
-            try {
-                client.connect("10.227.80.55");
-                login = client.login("User", "user");
-            } catch (Exception e) {
-                this.exception = e;
-                return null;
-            }
-            if (login) {
-                Log.d(TAG, "Connection established");
-            }
-            else {
-                Log.d(TAG, "Connection failed");
-            }
-            try {
-                if (client.logout()) {
-                    Log.d(TAG, "Successful logout");
-                }
-                else {
-                    Log.d(TAG, "Logout failed");
-                }
-            }
-            catch (Exception e) {
-                this.exception = e;
-            }
+            downloadFolder();
             return null;
         }
-        
+
         protected void onPostExecute() {
             if (exception == null) {
                 Log.d(TAG, "Downloaded files");
@@ -74,6 +48,19 @@ public class PullService extends JobService{
                 exception.printStackTrace();
             }
 
+        }
+
+        protected void downloadFolder() {
+            String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyDownload";
+            try {
+                FTPUtil client = new FTPUtil();
+                client.ftpClient.enterLocalPassiveMode();
+                client.ftpClient.login("User", "user");
+                client.downloadDirectory("/", baseDir);
+                client.ftpClient.logout();
+            } catch (Exception e) {
+                exception = e;
+            }
         }
     }
 

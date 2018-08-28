@@ -6,9 +6,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
+        try {
+            Log.d(TAG, "Scheduling pull");
+            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+            Job myJob = dispatcher.newJobBuilder()
+                    .setService(PullService.class)
+                    .setTag("Directory")
+                    .build();
+            dispatcher.schedule(myJob);
 
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
