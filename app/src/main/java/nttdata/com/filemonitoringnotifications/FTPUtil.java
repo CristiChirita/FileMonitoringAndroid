@@ -1,5 +1,9 @@
 package nttdata.com.filemonitoringnotifications;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.apache.commons.net.ftp.FTP;
@@ -24,6 +28,7 @@ public class FTPUtil {
     public boolean downloadFile(String remoteFilePath, String savePath) throws IOException {
         File downloadFile = new File(savePath);
         File parent = downloadFile.getParentFile();
+
         if (!parent.exists()) {
             parent.mkdirs();
         }
@@ -54,14 +59,20 @@ public class FTPUtil {
                     // skip parent directory and the directory itself
                     continue;
                 }
-                String filePath = parentDir + currentFileName;
+                String filePath = parentDir + File.separator + currentFileName;
+                if (parentDir.equals("/")) {
+                    filePath = parentDir + currentFileName;
+                }
 
-                String newDirPath = saveDir + parentDir + currentFileName;
+                String newDirPath = saveDir + File.separator + filePath;
+                if (parentDir.equals("/")) {
+                    newDirPath = saveDir + filePath;
+                }
 
                 if (aFile.isDirectory()) {
                     // create the directory in saveDir
                     File newDir = new File(newDirPath);
-                    boolean created = newDir.mkdirs();
+                    boolean created = newDir.getParentFile().mkdirs();
                     if (created) {
                         Log.d(TAG, "CREATED the directory: " + newDirPath);
                     } else {
@@ -69,7 +80,8 @@ public class FTPUtil {
                     }
 
                     // download the sub directory
-                    downloadDirectory(currentFileName, saveDir);
+
+                    downloadDirectory(filePath, saveDir);
                 } else {
                     // download the file
                     boolean success = downloadFile(filePath, newDirPath);

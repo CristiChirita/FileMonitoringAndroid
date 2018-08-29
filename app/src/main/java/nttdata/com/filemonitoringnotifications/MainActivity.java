@@ -1,9 +1,15 @@
 package nttdata.com.filemonitoringnotifications;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -25,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final Context context = this;
 
         FirebaseMessaging.getInstance().subscribeToTopic("files")
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -38,17 +45,31 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
-        try {
-            Log.d(TAG, "Scheduling pull");
-            FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-            Job myJob = dispatcher.newJobBuilder()
-                    .setService(PullService.class)
-                    .setTag("Directory")
-                    .build();
-            dispatcher.schedule(myJob);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        final Button button = findViewById(R.id.button_id);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                try {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "External storage permission not granted");
+                    }
+                    else {
+                        Log.d(TAG, "External storage permission granted");
+                    }
+                    Log.d(TAG, "Scheduling pull");
+                    FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
+                    Job myJob = dispatcher.newJobBuilder()
+                            .setService(PullService.class)
+                            .setTag("Directory")
+                            .build();
+                    dispatcher.schedule(myJob);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 }
