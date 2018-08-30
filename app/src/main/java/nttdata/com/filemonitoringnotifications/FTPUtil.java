@@ -37,7 +37,7 @@ public class FTPUtil {
         }
         OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
         try {
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            MainActivity.list.add(remoteFilePath);
             return ftpClient.retrieveFile(remoteFilePath, outputStream);
         } catch (IOException ex) {
             throw ex;

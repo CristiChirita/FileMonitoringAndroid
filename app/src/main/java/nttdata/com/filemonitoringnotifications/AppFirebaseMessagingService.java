@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static nttdata.com.filemonitoringnotifications.MainActivity.bean;
 
@@ -47,9 +48,9 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
             List<String> modifiedFiles = new ArrayList<>(Arrays.asList(modifiedFilesString.split(",")));
             if (modifiedFiles != null) {
                 for (String fileName : modifiedFiles) {
+                    fileName = fileName.replace("C:\\Users\\cristian.chirita\\Downloads", "");
                     HashSet<String> newFiles = bean.getFiles();
                     newFiles.add(fileName);
-                    bean.setFiles(newFiles);
                 }
                 Log.d(TAG, "Scheduling pull");
                 scheduleJob();
@@ -102,8 +103,8 @@ public class AppFirebaseMessagingService extends FirebaseMessagingService {
         // [START dispatch_job]
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
         Job myJob = dispatcher.newJobBuilder()
-                .setService(PullService.class)
-                .setTag("my-job-tag")
+                .setService(PullServiceFile.class)
+                .setTag("Files")
                 .build();
         dispatcher.schedule(myJob);
         // [END dispatch_job]

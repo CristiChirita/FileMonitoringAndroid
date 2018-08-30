@@ -4,18 +4,23 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
+
+import org.apache.commons.net.ftp.FTP;
 
 import java.io.File;
 import java.util.HashSet;
 
 import static nttdata.com.filemonitoringnotifications.MainActivity.bean;
+import static nttdata.com.filemonitoringnotifications.MainActivity.list;
 
-public class PullService extends JobService{
+public class PullServiceFolder extends JobService{
 
-    private static final String TAG = "PullService";
+    private static final String TAG = "PullServiceFolder";
     private RetrieveFilesTask task = new RetrieveFilesTask();
 
     @Override
@@ -57,6 +62,7 @@ public class PullService extends JobService{
                 FTPUtil client = new FTPUtil();
                 client.ftpClient.enterLocalPassiveMode();
                 client.ftpClient.login("User", "user");
+                client.ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
                 client.downloadDirectory("/", baseDir);
                 client.ftpClient.logout();
             } catch (Exception e) {
